@@ -6,7 +6,11 @@
         <li v-for="item in items" :key="item.id" class="post-list">
           <h4>
             <span>{{ item.title }}</span>
-            <small>ユーザーID： {{ item.user.id }}</small>
+            <small>ユーザーID：
+              <nuxt-link :to="`/users/${item.user.id}`">
+                {{ item.user.id }}
+              </nuxt-link>
+            </small>
           </h4>
           <div>{{ item.body.slice(0, 130) }}...</div>
           <div>コメント：　{{ item.comments_count }}件</div>
@@ -21,18 +25,22 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
-  async asyncData({ app }) {
-    // 'nuxt.js'のタグがつく投稿を取得する
-    const items = await app.$axios.$get('https://qiita.com/api/v2/items?query=tag:nuxt.js')
-    return {
-      items
+  async asyncData({ store }) {
+    if (store.getters['items'].length) {
+      return;
     }
+    await store.dispatch('fetchItems');
+  },
+  computed: {
+    ...mapGetters(['items'])
   }
-}
+};
 </script>
 
-<style>
+<style scoped>
 .container {
   min-height: 100vh;
   padding: 16px;
